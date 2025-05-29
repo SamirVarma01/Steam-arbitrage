@@ -97,9 +97,6 @@ export default function Home() {
               Items
             </Link>
             <Link href="#" className="text-sm font-medium text-muted-foreground transition-colors hover:text-blue-300">
-              Unusual Effects
-            </Link>
-            <Link href="#" className="text-sm font-medium text-muted-foreground transition-colors hover:text-blue-300">
               About
             </Link>
           </nav>
