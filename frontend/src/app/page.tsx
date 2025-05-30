@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PriceChart } from "@/components/price-chart"
 import { MobileNav } from "@/components/mobile-nav"
 import { Select } from "@/components/ui/select"
+import ItemSearch from '@/components/ItemSearch'
 
 interface PriceData {
   keyPriceInRef: number;
@@ -104,6 +105,22 @@ export default function Home() {
         </div>
       </header>
       <main className="flex-1">
+        <section className="bg-gradient-to-b from-blue-950 to-blue-900 py-16">
+          <div className="container mx-auto max-w-screen-lg px-4">
+            <div className="text-center mb-8">
+              <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight mb-4">
+                TF2 Trading Statistics
+              </h1>
+              <p className="text-xl text-blue-200 mb-8">
+                Search for any TF2 item to view its price history
+              </p>
+            </div>
+            <div className="max-w-2xl mx-auto">
+              <ItemSearch />
+            </div>
+          </div>
+        </section>
+
         <section className="container mx-auto max-w-screen-lg px-4 py-8 md:py-12 flex flex-col items-center">
           <div className="grid gap-6 lg:grid-cols-2">
             <div className="flex flex-col justify-center space-y-4">

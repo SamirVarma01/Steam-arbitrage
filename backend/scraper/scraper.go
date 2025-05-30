@@ -75,17 +75,19 @@ func FetchAllItems() error {
 	}
 
 	for itemName, item := range response.Response.Items {
-		_ = item 
+		_ = item
 		var itemID int
 		err := db.DB.QueryRow(
 			"INSERT INTO items (name, quality) VALUES ($1, $2) ON CONFLICT (name, quality) DO UPDATE SET updated_at = CURRENT_TIMESTAMP RETURNING id",
 			itemName,
-			0, 
+			0,
 		).Scan(&itemID)
 		if err != nil {
 			log.Printf("Error inserting item %s: %v", itemName, err)
 			continue
 		}
+
+		log.Printf("Scraped item into DB: %s (id: %d)", itemName, itemID)
 
 		if err := fetchAndStorePriceHistory(itemID, itemName, 0); err != nil {
 			log.Printf("Error fetching price history for %s: %v", itemName, err)

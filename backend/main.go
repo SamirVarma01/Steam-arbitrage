@@ -7,12 +7,14 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"tf2-dashboard/db"
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/rs/cors"
 	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 )
+
 type PriceData struct {
 	KeyPriceInRef float64 `json:"keyPriceInRef"`
 	RefPriceInUSD float64 `json:"refPriceInUSD"`
@@ -21,7 +23,7 @@ type PriceData struct {
 }
 type BackpackTFResponse struct {
 	Response struct {
-		Success int `json:"success"`
+		Success    int `json:"success"`
 		Currencies struct {
 			Keys struct {
 				Price struct {
@@ -54,6 +56,39 @@ type PriceHistoryResponse struct {
 	Points []PriceHistoryPoint `json:"points"`
 }
 
+func getItemPriceHistory(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	rows, err := db.DB.Query(
+		"SELECT price, timestamp FROM price_history WHERE item_id = $1 ORDER BY timestamp ASC",
+		id,
+	)
+	if err != nil {
+		log.Printf("Error fetching price history: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var history []map[string]interface{}
+	for rows.Next() {
+		var price float64
+		var timestamp int64
+		if err := rows.Scan(&price, &timestamp); err != nil {
+			log.Printf("Error scanning price history row: %v", err)
+			continue
+		}
+		history = append(history, map[string]interface{}{
+			"price":     price,
+			"timestamp": timestamp,
+		})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(history)
+}
+
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Printf("Warning: .env file not found")
@@ -64,6 +99,7 @@ func main() {
 	r.HandleFunc("/api/prices", getPrices).Methods("GET")
 	r.HandleFunc("/api/prices/history", getPriceHistory).Methods("GET")
 	r.HandleFunc("/api/items/search", searchItems).Methods("GET")
+	r.HandleFunc("/api/items/{id}/history", getItemPriceHistory).Methods("GET")
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000"},
@@ -98,8 +134,8 @@ func getPrices(w http.ResponseWriter, r *http.Request) {
 
 	q := req.URL.Query()
 	q.Add("key", apiKey)
-	q.Add("appid", "440") 
-	q.Add("raw", "1") 
+	q.Add("appid", "440")
+	q.Add("raw", "1")
 	req.URL.RawQuery = q.Encode()
 
 	resp, err := client.Do(req)
@@ -151,9 +187,9 @@ func getPriceHistory(w http.ResponseWriter, r *http.Request) {
 	item := r.URL.Query().Get("item")
 	quality := r.URL.Query().Get("quality")
 
-	timeframe := r.URL.Query().Get("timeframe") 
+	timeframe := r.URL.Query().Get("timeframe")
 	if timeframe == "" {
-		timeframe = "30days" 
+		timeframe = "30days"
 	}
 
 	client := &http.Client{Timeout: 10 * time.Second}
@@ -166,7 +202,7 @@ func getPriceHistory(w http.ResponseWriter, r *http.Request) {
 	q.Add("key", apiKey)
 	q.Add("item", item)
 	q.Add("quality", quality)
-	q.Add("appid", "440") 
+	q.Add("appid", "440")
 	req.URL.RawQuery = q.Encode()
 
 	resp, err := client.Do(req)
@@ -218,7 +254,7 @@ func getPriceHistory(w http.ResponseWriter, r *http.Request) {
 	case "3years":
 		cutoff = now - 3*365*24*60*60
 	default:
-		cutoff = 0 
+		cutoff = 0
 	}
 
 	filteredPoints := []PriceHistoryPoint{}
@@ -241,6 +277,39 @@ func getPriceHistory(w http.ResponseWriter, r *http.Request) {
 }
 
 func searchItems(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query().Get("q")
+	if query == "" {
+		json.NewEncoder(w).Encode([]map[string]interface{}{})
+		return
+	}
+
+	rows, err := db.DB.Query(
+		"SELECT id, name, quality FROM items WHERE name ILIKE $1 ORDER BY name LIMIT 5",
+		"%"+query+"%",
+	)
+	if err != nil {
+		log.Printf("Error searching items: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var items []map[string]interface{}
+	for rows.Next() {
+		var id int
+		var name string
+		var quality int
+		if err := rows.Scan(&id, &name, &quality); err != nil {
+			log.Printf("Error scanning item row: %v", err)
+			continue
+		}
+		items = append(items, map[string]interface{}{
+			"id":      id,
+			"name":    name,
+			"quality": quality,
+		})
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"message": "Not implemented yet"})
-} 
+	json.NewEncoder(w).Encode(items)
+}
