@@ -11,8 +11,8 @@ import (
 )
 
 func main() {
-	if err := godotenv.Load(); err != nil {
-		log.Printf("Warning: .env file not found")
+	if err := godotenv.Load("../.env"); err != nil {
+		log.Printf("Warning: .env file not found at ../../.env")
 	}
 
 	if err := db.InitDB(); err != nil {

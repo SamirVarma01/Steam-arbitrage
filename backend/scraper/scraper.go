@@ -13,7 +13,7 @@ import (
 )
 
 type BackpackTFItem struct {
-	Defindex int    `json:"defindex"`
+	Defindex []int  `json:"defindex"`
 	Name     string `json:"name"`
 	Quality  int    `json:"quality"`
 }
@@ -54,13 +54,14 @@ func FetchAllItems() error {
 		return fmt.Errorf("error reading response: %v", err)
 	}
 
+	log.Printf("Raw API response: %s", string(body))
+
 	var response struct {
 		Response struct {
 			Success int `json:"success"`
-			Items   map[string]map[string]struct {
-				Defindex int    `json:"defindex"`
-				Name     string `json:"name"`
-				Quality  int    `json:"quality"`
+			Items   map[string]struct {
+				Defindex []int                  `json:"defindex"`
+				Prices   map[string]interface{} `json:"prices"`
 			} `json:"items"`
 		} `json:"response"`
 	}
@@ -73,26 +74,25 @@ func FetchAllItems() error {
 		return fmt.Errorf("backpack.tf API error: %s", string(body))
 	}
 
-	for _, itemMap := range response.Response.Items {
-		for _, item := range itemMap {
-			var itemID int
-			err := db.DB.QueryRow(
-				"INSERT INTO items (name, quality) VALUES ($1, $2) ON CONFLICT (name, quality) DO UPDATE SET updated_at = CURRENT_TIMESTAMP RETURNING id",
-				item.Name,
-				item.Quality,
-			).Scan(&itemID)
-			if err != nil {
-				log.Printf("Error inserting item %s (quality %d): %v", item.Name, item.Quality, err)
-				continue
-			}
-
-			if err := fetchAndStorePriceHistory(itemID, item.Name, item.Quality); err != nil {
-				log.Printf("Error fetching price history for %s (quality %d): %v", item.Name, item.Quality, err)
-				continue
-			}
-
-			time.Sleep(1 * time.Second)
+	for itemName, item := range response.Response.Items {
+		_ = item 
+		var itemID int
+		err := db.DB.QueryRow(
+			"INSERT INTO items (name, quality) VALUES ($1, $2) ON CONFLICT (name, quality) DO UPDATE SET updated_at = CURRENT_TIMESTAMP RETURNING id",
+			itemName,
+			0, 
+		).Scan(&itemID)
+		if err != nil {
+			log.Printf("Error inserting item %s: %v", itemName, err)
+			continue
 		}
+
+		if err := fetchAndStorePriceHistory(itemID, itemName, 0); err != nil {
+			log.Printf("Error fetching price history for %s: %v", itemName, err)
+			continue
+		}
+
+		time.Sleep(1 * time.Second)
 	}
 
 	return nil
@@ -125,6 +125,8 @@ func fetchAndStorePriceHistory(itemID int, itemName string, quality int) error {
 		return fmt.Errorf("error reading response: %v", err)
 	}
 
+	log.Printf("Raw API response: %s", string(body))
+
 	var historyResp struct {
 		Response struct {
 			Success int `json:"success"`
@@ -143,7 +145,6 @@ func fetchAndStorePriceHistory(itemID int, itemName string, quality int) error {
 		return fmt.Errorf("backpack.tf price history API error for item %s (quality %d)", itemName, quality)
 	}
 
-	// Store price history in database
 	for _, point := range historyResp.Response.History {
 		_, err := db.DB.Exec(
 			"INSERT INTO price_history (item_id, price, timestamp) VALUES ($1, $2, $3) ON CONFLICT (item_id, timestamp) DO NOTHING",
