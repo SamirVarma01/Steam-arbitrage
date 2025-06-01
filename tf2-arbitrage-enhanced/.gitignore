@@ -1,0 +1,10 @@
+*.log
+.vscode
+__pycache__
+*/config*
+data
+testing
+*.html
+prod/
+json/
+*.jpg

@@ -1,0 +1,14 @@
+Metadata-Version: 2.4
+Name: tf2-arbitrage
+Version: 0.1.0
+License-File: LICENSE
+Requires-Dist: requests
+Requires-Dist: websocket-client
+Requires-Dist: websockets
+Requires-Dist: tf2-utils
+Requires-Dist: tf2-sku
+Requires-Dist: tf2-data
+Requires-Dist: bptf
+Requires-Dist: pymongo
+Dynamic: license-file
+Dynamic: requires-dist

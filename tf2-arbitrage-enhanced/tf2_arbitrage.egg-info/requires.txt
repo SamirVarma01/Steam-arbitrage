@@ -1,0 +1,8 @@
+requests
+websocket-client
+websockets
+tf2-utils
+tf2-sku
+tf2-data
+bptf
+pymongo

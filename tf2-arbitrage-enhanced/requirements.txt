@@ -1,0 +1,10 @@
+requests
+selenium
+pymongo
+beautifulsoup4
+tf2-sku
+tf2-data
+tf2-utils
+stntrading
+websocket-client
+offish

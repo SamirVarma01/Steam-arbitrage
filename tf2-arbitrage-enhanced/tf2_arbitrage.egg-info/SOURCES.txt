@@ -1,0 +1,10 @@
+LICENSE
+README.md
+setup.py
+tests/__init__.py
+tests/test_socket.py
+tf2_arbitrage.egg-info/PKG-INFO
+tf2_arbitrage.egg-info/SOURCES.txt
+tf2_arbitrage.egg-info/dependency_links.txt
+tf2_arbitrage.egg-info/requires.txt
+tf2_arbitrage.egg-info/top_level.txt
