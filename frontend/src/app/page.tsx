@@ -83,7 +83,7 @@ export default function Home() {
         <div className="container flex h-16 items-center justify-between pl-4 md:pl-8">
           <div className="flex items-center gap-2">
             <Link href="/" className="flex items-center gap-2 font-bold text-xl">
-              <span className="hidden sm:inline-block">TF2 Trading Stats</span>
+              <span className="hidden sm:inline-block">TF-Trades</span>
               <span className="sm:hidden">TF2 Stats</span>
             </Link>
           </div>
@@ -109,7 +109,7 @@ export default function Home() {
           <div className="container mx-auto max-w-screen-lg px-4">
             <div className="text-center mb-8">
               <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight mb-4">
-                TF2 Trading Statistics
+                TF-Trades
               </h1>
               <p className="text-xl text-blue-200 mb-8">
                 Search for any TF2 item to view its price history
@@ -126,7 +126,7 @@ export default function Home() {
             <div className="flex flex-col justify-center space-y-4">
               <div className="space-y-2">
                 <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight mb-4 text-center">
-                  TF2 Trading Statistics
+                  TF-Trades
                 </h1>
                 <p className="max-w-2xl text-blue-200 md:text-xl mb-6 text-center">
                   Real-time market data and historical trends for Team Fortress 2 trading.
@@ -373,7 +373,7 @@ export default function Home() {
       <footer className="border-t border-blue-800/40 bg-blue-950/80 py-6">
         <div className="container mx-auto max-w-screen-lg flex flex-col items-center justify-between gap-4 md:flex-row">
           <p className="text-center text-sm text-blue-300 md:text-left">
-            &copy; {new Date().getFullYear()} TF2 Trading Stats. All rights reserved.
+            &copy; {new Date().getFullYear()} TF-Trades. All rights reserved.
           </p>
           <nav className="flex gap-4">
             <Link href="#" className="text-sm text-blue-300 hover:text-blue-100">

@@ -243,8 +243,6 @@ func getPriceHistory(w http.ResponseWriter, r *http.Request) {
 	var cutoff int64
 	now := time.Now().Unix()
 	switch timeframe {
-	case "7days":
-		cutoff = now - 7*24*60*60
 	case "30days":
 		cutoff = now - 30*24*60*60
 	case "90days":
